@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hacklike.fo.mapper.PersionMapper">
+
+    <insert id="addPersion" parameterType="cn.hacklike.fo.entity.Persion">
+      INSERT INTO
+      fo.persion
+      ( id, username, password, create_time, update_time, update_user )
+      VALUES
+	  ( #{id}, #{username}, #{password}, #{createTime}, #{updateTime}, #{updateUser} );
+    </insert>
+
+    <select id="getPersonList" resultType="cn.hacklike.fo.entity.Persion">
+        select * from persion;
+    </select>
+
+</mapper>

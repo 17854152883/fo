@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" type="text/css" th:href="@{/layui/css/layui.css}" />
+
+    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+    <div>
+        <form class="layui-form" action="/login" method="post"> <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="username" placeholder="请输入" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">密码</label>
+                <div class="layui-input-block">
+                    <input type="password" name="password" placeholder="请输入" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div id="loginButton" class="layui-form-item layui-inline">
+                <div class="layui-input-block layui-input-inline">
+                    <input type="submit" value="登录">
+                    <!--<button class="layui-btn" lay-submit lay-filter="loginOn">登录</button>-->
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script type="text/javascript" th:inline="javascript">
+        //监听提交
+        // form.on('submit(loginOn)', function(data){
+        //     console.log(JSON.stringify(data.field));
+        //     $.ajax({
+        //         type: 'POST',
+        //         async: false, // 默认异步true,false表示同步
+        //         url: "/login", // 请求地址
+        //         data: data.field, //获取提交的表单字段
+        //         success: function(data) {
+        //             console.log('登录返回成功',data)
+        //         },
+        //         error: function(XMLHttpRequest, textStatus, e) {
+        //             layer.msg('数据请求发生异常,请稍后重试', {icon: 16,scrollbar: false});
+        //         }
+        //     });
+        // });
+
+    </script>
+</body>
+</html>

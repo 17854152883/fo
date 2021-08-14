@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" type="text/css" th:href="@{/layui/css/layui.css}" />
+
+    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script th:src="@{/layui/layui.js}"></script>
+    <title>动漫名言管理页</title>
+</head>
+<body>
+    <div class="layui-layout layui-layout-admin">
+        <div th:replace="head :: headMenu"></div>
+
+        <div class="layui-body" style="padding: 20px;">
+            <div style="margin-top: 20px">
+                <form class="layui-form">
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">动漫名</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="titleSel" name="dmTitle" placeholder="请输入" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">人物名</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="nameSel" name="dmName" placeholder="请输入" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-inline">
+                        <div class="layui-input-block layui-input-inline">
+                            <button class="layui-btn" lay-submit lay-filter="queryDmSaying">查询</button>
+                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div>
+                <button id="showForm" type="button" class="layui-btn">新增</button>
+            </div>
+            <div>
+                <table id="dmSayingTable" lay-filter="dmSayingTable"></table><br />
+                <script type="text/html" id="toolbarDm">
+                    <a class="layui-btn layui-btn-xs" lay-event="show">查看</a>
+                    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+                    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+                </script>
+            </div>
+
+        </div>
+
+        <div class="layui-footer">
+            <!-- 底部固定区域 -->
+            底部固定区域
+        </div>
+        <div>
+            <form class="layui-form" id="dmSayingForm" style="display:none;padding: 10px">
+                <div class="layui-form-item" style="display: none">
+                    <label class="layui-form-label">ID</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="dmId" name="dmId" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">动漫名</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="dmTitle" name="dmTitle" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">人物名</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="dmName" name="dmName" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">文件路径</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="imgUrl" name="dmImgUrl" disabled placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">名言</label>
+                    <div class="layui-input-block">
+                        <textarea id="dmText" name="dmText" placeholder="请输入内容" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">上传图片</label>
+                    <div class="layui-input-block">
+                        <button type="button" class="layui-btn" id="uploadImg">
+                            <i class="layui-icon">&#xe67c;</i>上传图片
+                        </button>
+                    </div>
+                </div>
+                <div id="caozuo" class="layui-form-item layui-inline">
+                    <div class="layui-input-block layui-input-inline">
+                        <button class="layui-btn" lay-submit lay-filter="addDmSaying">提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript" th:inline="javascript">
+        layui.use(['element', 'layer', 'util', 'table', 'upload','form'], function(){
+            var element = layui.element
+                ,layer = layui.layer
+                ,util = layui.util
+                ,$ = layui.$;
+
+            var table = layui.table;
+            var upload = layui.upload;
+            var form = layui.form;
+
+            table.render({
+                elem: '#dmSayingTable'
+                ,height: 400
+                ,url: '/dmSaying/public/getAllDmSaying' //数据接口
+                ,method:'post'
+                ,page: true //开启分页
+                ,id:'dmSayingTable'
+                ,cols: [
+                    [ //表头
+                        {field: 'dmId', title: 'ID', width:160, sort: true, fixed: 'left'}
+                        ,{field: 'dmTitle', title: '动漫名', width:120}
+                        ,{field: 'dmName', title: '人物名', width:120}
+                        ,{field: 'dmImgUrl', title: '图片路径名', width:380}
+                        ,{field: 'dmText', title: '名言内容'}
+                        ,{fixed: 'right', title: '操作', width:200, align:'center', toolbar: '#toolbarDm'}
+                    ]
+                ]
+            });
+
+            //监听查询提交
+            form.on('submit(queryDmSaying)', function(data){
+                //执行重载
+                table.reload('dmSayingTable', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    // ,where: JSON.stringify(data.field)
+                    , where: {//这里传参 向后台
+                        dmTitle: data.field.dmTitle,
+                        dmName:data.field.dmName
+                        //可传多个参数到后台... ，分隔
+                    }
+                    , url: '/dmSaying/getDmSayingByName'//后台做模糊搜索接口路径
+                    , method: 'post'
+                    , contentType: "application/json;charset=UTF-8"
+                });
+
+                return false;
+            });
+            //监听提交
+            form.on('submit(addDmSaying)', function(data){
+                layer.msg(JSON.stringify(data.field));
+                console.log(JSON.stringify(data.field));
+                $.ajax({
+                    type: 'POST',
+                    async: false, // 默认异步true,false表示同步
+                    contentType: "application/json;charset=UTF-8",
+                    url: "/dmSaying/addDmSaying", // 请求地址
+                    dataType: 'json', // 服务器返回数据类型
+                    data: JSON.stringify(data.field), //获取提交的表单字段
+                    success: function(data) {
+                        if (data.data > 0){
+                            //执行重载
+                            reloadTable()
+                        }
+                        layer.closeAll();
+                    },
+                    error: function(XMLHttpRequest, textStatus, e) {
+                        layer.msg('数据请求发生异常,请稍后重试', {icon: 16,scrollbar: false});
+                    }
+                });
+                return false;
+            });
+
+            function reloadTable() {
+                table.reload('dmSayingTable', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {//这里传参 向后台
+                        dmTitle: $("#titleSel").val(),
+                        dmName:$("#nameSel").val()
+                        //可传多个参数到后台... ，分隔
+                    }
+                    , url: '/dmSaying/getDmSayingByName'//后台做模糊搜索接口路径
+                    , method: 'post'
+                    , contentType: "application/json;charset=UTF-8"
+                });
+            }
+
+            var uploadInst = upload.render({
+                elem: '#uploadImg' //绑定元素
+                ,url: '/file/uploadImg' //上传接口
+                ,field:'img'
+                ,before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+                    if($("#imgUrl").val() != '' && $("#imgUrl").val() != null){
+                        $.ajax({
+                            type: 'POST',
+                            async: false, // 默认异步true,false表示同步
+                            contentType: "application/json;charset=UTF-8",
+                            url: "/file/deleteImg", // 请求地址
+                            dataType: 'json', // 服务器返回数据类型
+                            data: JSON.stringify({url:$("#imgUrl").val()}), //获取提交的表单字段
+                            success: function(data) {
+                                console.log("删除",data.data)
+                            },
+                            error: function(XMLHttpRequest, textStatus, e) {
+                                layer.msg('数据请求发生异常,请稍后重试', {icon: 16,scrollbar: false});
+                            }
+                        });
+                    }
+                    layer.load(); //上传loading
+                }
+                ,done: function(res){
+                    //上传完毕回调
+                    $("#imgUrl").val(res.data)
+                    layer.closeAll('loading');
+                }
+                ,error: function(){
+                    //请求异常回调
+                    console.log("上传失败")
+                }
+            });
+
+            $("#showForm").on("click",function () {
+                $("#dmSayingForm")[0].reset();
+                layer.open({
+                    type:1,
+                    area:['500px','500px'],
+                    title: '新增'
+                    ,content: $("#dmSayingForm"),
+                    shade: 0,
+                    cancel: function(layero,index){
+                        layer.closeAll();
+                    }
+                });
+            })
+            //工具条事件
+            table.on('tool(dmSayingTable)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+                if(layEvent === 'show'){ //查看
+                    $("#dmTitle").val(data.dmTitle)
+                    $("#dmTitle").attr("disabled",true);
+                    $("#dmName").val(data.dmName)
+                    $("#dmName").attr("disabled",true);
+                    $("#imgUrl").val(data.dmImgUrl)
+                    $("#dmText").val(data.dmText)
+                    $("#dmText").attr("disabled",true);
+                    $("#uploadImg").attr("disabled",true);
+                    $("#caozuo").hide()
+
+                    layer.open({
+                        type:1,
+                        area:['500px','500px'],
+                        title: '查看'
+                        ,content: $("#dmSayingForm"),
+                        shade: 0,
+                        cancel: function(layero,index){
+                            layer.closeAll();
+                        }
+                    });
+                } else if(layEvent === 'del'){ //删除
+                    layer.confirm('真的删除行么', function(index){
+                        obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                        layer.close(index);
+                        //向服务端发送删除指令
+                        $.ajax({
+                            type: 'POST',
+                            async: false, // 默认异步true,false表示同步
+                            contentType: "application/json;charset=UTF-8",
+                            url: "/dmSaying/delectDmSayingById", // 请求地址
+                            dataType: 'json', // 服务器返回数据类型
+                            data: JSON.stringify(data), //获取提交的表单字段
+                            success: function(data) {
+                                if (data.data > 0){
+                                    //执行重载
+                                    reloadTable()
+                                }
+                            },
+                            error: function(XMLHttpRequest, textStatus, e) {
+                                layer.msg('数据请求发生异常,请稍后重试', {icon: 16,scrollbar: false});
+                            }
+                        });
+                        // 删除相关图片
+                        if(data.dmImgUrl != '' && data.dmImgUrl != null){
+                            $.ajax({
+                                type: 'POST',
+                                async: false, // 默认异步true,false表示同步
+                                contentType: "application/json;charset=UTF-8",
+                                url: "/file/deleteImg", // 请求地址
+                                dataType: 'json', // 服务器返回数据类型
+                                data: JSON.stringify({url:data.dmImgUrl}), //获取提交的表单字段
+                                success: function(data) {
+                                    console.log("删除",data.data)
+                                },
+                                error: function(XMLHttpRequest, textStatus, e) {
+                                    layer.msg('数据请求发生异常,请稍后重试', {icon: 16,scrollbar: false});
+                                }
+                            });
+                        }
+                    });
+                } else if(layEvent === 'edit'){ //编辑
+                    $("#dmId").val(data.dmId)
+                    $("#dmTitle").val(data.dmTitle)
+                    $("#dmTitle").attr("disabled",false);
+                    $("#dmName").val(data.dmName)
+                    $("#dmName").attr("disabled",false);
+                    $("#imgUrl").val(data.dmImgUrl)
+                    $("#dmText").val(data.dmText)
+                    $("#dmText").attr("disabled",false);
+                    $("#uploadImg").attr("disabled",false);
+                    $("#caozuo").show()
+                    layer.open({
+                        type:1,
+                        area:['500px','500px'],
+                        title: '编辑'
+                        ,content: $("#dmSayingForm"),
+                        shade: 0,
+                        cancel: function(layero,index){
+                            layer.closeAll();
+                        }
+                    });
+
+                    //同步更新缓存对应的值
+                    // obj.update({
+                    //     username: '123'
+                    //     ,title: 'xxx'
+                    // });
+                } else if(layEvent === 'LAYTABLE_TIPS'){
+                    layer.alert('Hi，头部工具栏扩展的右侧图标。');
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
